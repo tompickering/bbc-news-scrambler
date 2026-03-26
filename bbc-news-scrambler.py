@@ -6,6 +6,7 @@ import bbc
 import sys
 import random
 import requests
+import webbrowser
 import tkinter as tk
 
 from io import BytesIO
@@ -13,6 +14,7 @@ from PIL import Image, ImageTk
 
 
 WIDTH = 600
+LMB = '<Button-1>'
 
 
 def scramble(root, articles):
@@ -63,13 +65,16 @@ def scramble(root, articles):
     a0_n = a0['news_link']
     a1_n = a1['news_link']
 
+    image_label.bind(LMB, lambda _: webbrowser.open(a1_n))
+    headline_label.bind(LMB, lambda _: webbrowser.open(a0_n))
+
     def redo():
         redo_label.destroy()
         headline_label.destroy()
         image_label.destroy()
         scramble(root, articles)
 
-    redo_label.bind('<Button-1>', lambda _: redo())
+    redo_label.bind(LMB, lambda _: redo())
 
     return True
 
