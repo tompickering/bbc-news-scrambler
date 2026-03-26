@@ -12,6 +12,7 @@ Here it is!
 ## Requirements
 
 [bbc-news](https://pypi.org/project/bbc-news/)
+[pillow](https://pypi.org/project/pillow/)
 
 
 ## Disclaimer

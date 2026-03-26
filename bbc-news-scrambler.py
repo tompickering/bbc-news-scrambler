@@ -5,9 +5,19 @@
 import bbc
 import sys
 import random
+import requests
+import tkinter as tk
+
+from io import BytesIO
+from PIL import Image, ImageTk
 
 
-def scramble(articles):
+WIDTH = 600
+
+
+def scramble(root, articles):
+    global WIDTH
+
     n_articles = len(articles)
 
     if n_articles < 2:
@@ -23,16 +33,51 @@ def scramble(articles):
     a1 = articles[i1]
 
     title = a0['title']
-    image = a1['image_link']
+    image_link = a1['image_link']
+
+    image_response = requests.get(image_link)
+    image_data = BytesIO(image_response.content)
+    image = Image.open(image_data)
+    img_sc = WIDTH / image.width
+    image = image.resize((int(image.width*img_sc), int(image.height*img_sc)))
+
+
+    if image_response.status_code != 200:
+        return False
+
+    if image_response.headers.get('content-type') != 'image/webp':
+        return False
+
+    image_tk = ImageTk.PhotoImage(image)
+
+    image_label = tk.Label(root, image=image_tk)
+    image_label.image = image_tk
+    image_label.pack()
+
+    headline_label = tk.Label(root, text=title)
+    headline_label.pack()
+
+    redo_label = tk.Label(root, text='RESCRAMBLE')
+    redo_label.pack()
 
     a0_n = a0['news_link']
     a1_n = a1['news_link']
 
-    print(title)
-    print(image)
+    def redo():
+        redo_label.destroy()
+        headline_label.destroy()
+        image_label.destroy()
+        scramble(root, articles)
+
+    redo_label.bind('<Button-1>', lambda _: redo())
+
+    return True
 
 
 if __name__ == '__main__':
+    root = tk.Tk()
+    root.title('BBC News Scrambler')
+
     news = bbc.news.get_news(bbc.Languages.English)
 
     categories = news.news_categories()
@@ -44,9 +89,6 @@ if __name__ == '__main__':
 
     articles = [a for a in articles if a['title'] and a['image_link']]
 
-    while True:
-        try:
-            scramble(articles)
-            input()
-        except KeyboardInterrupt:
-            break
+    scramble(root, articles)
+
+    root.mainloop()
