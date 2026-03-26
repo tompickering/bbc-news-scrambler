@@ -87,12 +87,19 @@ if __name__ == '__main__':
 
     categories = news.news_categories()
 
+    links = set()
     articles = []
 
     for cat in categories:
-        articles += news.news_category(cat)
+        for article in news.news_category(cat):
+            if not (article['title'] and article['image_link']):
+                continue
 
-    articles = [a for a in articles if a['title'] and a['image_link']]
+            if article['news_link'] in links:
+                continue
+
+            links.add(article['news_link'])
+            articles.append(article)
 
     scramble(root, articles)
 
